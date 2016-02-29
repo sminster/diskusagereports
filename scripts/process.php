@@ -184,6 +184,14 @@ The OPTIONS are:
       directories deep in the report. This is useful if the directory being
       reported on has many files, which can cause the report to take a long
       time to generate. The default is 3.
+
+      -ld <depth>
+      Output directory hash files into a <depth> level of subdirectories based
+      on their hash value.  If 0, all hash files are placed in the top of the
+      report directory.  If 1, hash files are placed in a single level of
+      subdirs, 0-f.  If 2, then two levels are used.  Higher values are better
+      if your report has a larger number of directories in it.  The default
+      is 2.
       
       -tz <timezone>
       Set the report timezone. These are the same timezones as
@@ -248,6 +256,10 @@ while (!is_null($cliarg = $cliargOrig = array_shift($cliargs))) {
 		case '-td':
 			if (!preg_match('/^[0-9]+$/', $cliarg = array_shift($cliargs))) { echo "$cliargOrig must be followed by a number.\n".$syntax; exit(1); }
 			$processor->setTop100Depth(intval($cliarg));
+			break;
+		case '-ld':
+			if (!preg_match('/^[0-9]+$/', $cliarg = array_shift($cliargs))) { echo "$cliargOrig must be followed by a number.\n".$syntax; exit(1); }
+			$processor->setOutDirLevels(intval($cliarg));
 			break;
 		case '-n':
 			$processor->setName($cliarg = array_shift($cliargs));

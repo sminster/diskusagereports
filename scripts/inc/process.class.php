@@ -79,6 +79,7 @@ class Process {
 	var $_verboseLevel;
 	var $_includeFullPath;
 	var $_suffix;
+	var $_outDirLevels;
 	var $_minStatusSeconds;
 	
 	// Internal only
@@ -118,6 +119,7 @@ class Process {
 		$this->_verboseLevel = PROCESS_VERBOSE_NORMAL;
 		$this->_includeFullPath = FALSE;
 		$this->_suffix = ".txt";
+		$this->_outDirLevels = 2;
 		$this->_listVersion = 1;
 		$this->_failDetails = array();
 		$this->_bytesRead = 0;
@@ -637,10 +639,17 @@ class Process {
 			if (PROCESS_PROFILING) $this->_startProfile('_checkDirStack save');
 			
 			// Save the directory data.
-			if (($bytes = file_put_contents($this->_reportDir . DIRECTORY_SEPARATOR . md5($path) . $this->_suffix, json_encode($pop))) === FALSE) {
+			$curHash = md5($path);
+			$outDir = $this->_reportDir . DIRECTORY_SEPARATOR;
+			for($i = 0; $i < $this->_outDirLevels; ++$i)
+			{
+				$outDir .= substr($curHash, $i, 1) . DIRECTORY_SEPARATOR;
+			}
+			if (!is_dir($outDir)) { mkdir($outDir, 0777, true); }
+			if (($bytes = file_put_contents($outDir . $curHash . $this->_suffix, json_encode($pop))) === FALSE) {
 				if ($this->_verboseLevel > PROCESS_VERBOSE_QUIET)
-					$this->_raiseEvent(PROCESS_WARN_WRITEFAIL, $this->_reportDir . DIRECTORY_SEPARATOR . md5($path), $path);
-				array_push($errors, array('writefail', $path, md5($path)));
+					$this->_raiseEvent(PROCESS_WARN_WRITEFAIL, $outDir . $curHash . $this->_suffix, $path);
+				array_push($errors, array('writefail', $path, $curHash));
 			}
 			
 			$this->_bytesWritten += $bytes;
@@ -679,6 +688,7 @@ class Process {
 			'name' => $this->_name,
 			'created' => date('M j, Y g:i:s A T'),
 			'directorytree' => !$this->_noTree,
+			'outdirlevels' => $this->_outDirLevels,
 			'root' => md5(''), // The root path is always an empty string.
 			'sizes' => $this->_sizeGroups,
 			'modified' => $this->_modifiedGroups,
@@ -1089,6 +1099,12 @@ class Process {
 	}
 	function setSuffix($suffix) {
 		$this->_suffix = $suffix;
+	}
+	function getOutDirLevels() {
+		return $this->_outDirLevels;
+	}
+	function setOutDirLevels($levels) {
+		$this->_outDirLevels = $levels;
 	}
 	function getFailDetails() {
 		return $this->_failDetails;

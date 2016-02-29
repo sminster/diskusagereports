@@ -183,11 +183,17 @@ $.extend(Controller.prototype, {
 	
 	_downloadHash: function(completeFn) {
 		var self = this;
+
+		var hashDir = this.reportsBaseURL + this.report;
+		for(var i = 0; i < this.settings.outdirlevels; ++i)
+		{
+			hashDir += '/' + this.options.hash.substr(i, 1);
+		}
 		
 		if (this._xhr) this._xhr.abort();
 		this._xhr = $.ajax({
 			cache: false,
-			url: this.reportsBaseURL + this.report + '/' + this.options.hash + this.settings.suffix,
+			url: hashDir + '/' + this.options.hash + this.settings.suffix,
 			type: 'GET',
 			dataType: 'json',
 			error: function(xhr, status, ex) {
