@@ -13,7 +13,7 @@
 define('PROCESS_PROFILING', false);
 
 define('PROCESS_VERSION', '1.0');
-define('LIST_VERSION', 2);
+define('LIST_VERSION', 3);
 
 define('PROCESS_OK', 0);
 
@@ -101,6 +101,8 @@ class Process {
 	var $_col_date;
 	var $_col_time;
 	var $_col_size;
+	var $_col_blocks;
+	var $_col_owner;
 	var $_col_depth;
 	var $_col_path;
 	
@@ -134,6 +136,8 @@ class Process {
 		$this->_col_date = 1;
 		$this->_col_time = 2;
 		$this->_col_size = 3;
+		$this->_col_blocks = 0;
+		$this->_col_owner = 0;
 		$this->_col_depth = 4;
 		$this->_col_path = 5;
 	}
@@ -340,6 +344,15 @@ class Process {
 				// Override the field separator.
 				$this->_delim = chr(intval($splitHeader[1]));
 				
+
+				if ($this->_listVersion >= 3)
+				{
+					$this->_colCount   = 7;
+					$this->_col_blocks = 4;
+					$this->_col_owner  = 5;
+					$this->_col_path   = 6;
+				}
+
 				// Recreate the lineRegEx with the correct delim.
 				$this->_createLineRegEx();
 				
@@ -353,7 +366,8 @@ class Process {
 					'basename' => null,
 					'datetime' => substr($splitHeader[3] . " " . $splitHeader[4], 0, 19),
 					'datetimeformat' => 'timestamp',
-					'escaped' => false
+					'escaped' => false,
+					'blocksize' => 512
 				);
 				
 				// Settings from file list's header.
@@ -372,6 +386,10 @@ class Process {
 									$invalidSetting = true;
 								break;
 							case "dirname":
+								if (count($split) == 1)
+									$invalidSetting = true;
+								break;
+							case "blocksize":
 								if (count($split) == 1)
 									$invalidSetting = true;
 								break;
@@ -951,6 +969,7 @@ class Process {
 				break;
 			
 			case 2:
+			case 3:
 				$this->_lineRegEx = '/^' . 
 					implode(preg_quote($this->_delim), array(
 						'[dflcbpus\-]',
