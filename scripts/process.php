@@ -460,10 +460,10 @@ if ($ret != PROCESS_OK && $processor->getVerboseLevel() > PROCESS_VERBOSE_QUIET)
 			echo "FAIL: <filelist> contains characters that are not UTF-8, Windows-1252 or ISO-8859-1.\n";
 			break;
 		case PROCESS_FAIL_UNEXPECTED_HEADER:
-			echo "FAIL: <filelist> contains a header line in an unexpected location. It must always be the first non-error line in the file:\n" . $processor->getFailLine() . "\n";
+			echo "FAIL: <filelist> contains a header line in an unexpected location. It must always be the first non-error line in the file:\n";
 			break;
 		case PROCESS_FAIL_UNSUPPORTED_LIST_VERSION:
-			echo "FAIL: <filelist> uses a version that does script does not support:\n" . $processor->getFailLine() . "\n";
+			echo "FAIL: <filelist> uses a version that does script does not support.\n";
 			break;
 		case PROCESS_FAIL_SETTINGS_WRITEFAIL:
 			echo "FAIL: Failed to write settings file.\n";
